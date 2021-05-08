@@ -46,7 +46,59 @@ app.get('/createpatienttable', (req, res) => {
     });
 });
 
-// 
+// Route: Insert patient 1
+app.get('/add1', (req, res) => {
+    let patient = {firstName:'Luis', surname:'Corales', pathology:'None'};
+    let sql = 'INSERT INTO patient SET ?';
+
+    db.query(sql, patient, (err, result) => {
+        if(err) {
+            throw err;
+        }
+        console.log(result);
+        res.send('Patient added!')
+    });
+});
+
+// Route: Insert patient 2
+app.get('/add2', (req, res) => {
+    let patient = {firstName:'Mario', surname:'Rodriguez', pathology:'Flu'};
+    let sql = 'INSERT INTO Patient SET ?';
+
+    db.query(sql, patient, (err, result) => {
+        if(err) {
+            throw err;
+        }
+        console.log(result);
+        res.send('Patient added!')
+    });
+});
+
+// Route: Get patients
+app.get('/getpatients', (req, res) => {
+    let sql = 'SELECT * FROM Patient';
+
+    db.query(sql, (err, results) => {
+        if(err) {
+            throw err;
+        }
+        console.log(results);
+        res.send('Patients fetched!')
+    });
+});
+
+// Route: Get selected patient
+app.get('/getpatient/:id', (req, res) => {
+    let sql = `SELECT * FROM Patient WHERE id = ${req.params.id}`;
+
+    db.query(sql, (err, result) => {
+        if(err) {
+            throw err;
+        }
+        console.log(result);
+        res.send(`Patient ${req.params.id} fetched!`)
+    });
+});
 
 // Settings -> port = 5500
 app.set("port", 5500);
