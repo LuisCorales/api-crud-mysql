@@ -100,6 +100,35 @@ app.get('/getpatient/:id', (req, res) => {
     });
 });
 
+// Route: Update patient
+app.get('/update/:id', (req, res) => {
+    let newPathology = 'Fever';
+    let sql = `UPDATE Patient SET pathology = '${newPathology}' WHERE id = ${req.params.id}`;
+
+    db.query(sql, (err, result) => {
+        if(err) {
+            throw err;
+        }
+        console.log(result);
+        res.send(`Patient ${req.params.id} updated!`)
+    });
+});
+
+// Route: Delete patient
+app.get('/deletepatient/:id', (req, res) => {
+    let sql = `DELETE FROM Patient WHERE id = ${req.params.id}`;
+    
+    db.query(sql, (err, result) => {
+        if(err) {
+            throw err;
+        }
+        console.log(result);
+        res.send(`Patient ${req.params.id} deleted!`)
+    });
+});
+
+// Route: Inactivate patient (to avoid deleting data, just change a boolean if it's active or not)
+
 // Settings -> port = 5500
 app.set("port", 5500);
 const port = app.set("port");
