@@ -1,138 +1,50 @@
+// Create express application
 const express = require("express");
-const mysql = require("mysql");
-
-// Create connection
-const db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "123456",
-    database: "medicaldb"
-});
-
-// Connect to MySQL DB
-db.connect((err) => {
-    if(err) {
-        throw err;
-    }
-
-    console.log("MySQL connected!")
-});
-
 const app = express();
 
-// Route: Create DB
-app.get('/createdb', (req, res) => {
-    let sql = 'CREATE DATABASE medicaldb';
-    
-    db.query(sql, (err, result) => {
-        if(err) {
-            throw err;
-        }
-        console.log(result);
-        res.send("Database created!");
-    });
-});
+// Get the routes of each table
+const patientsRoutes = require("./routes/patients");
+const doctorsRoutes = require("./routes/doctors");
+const hospitalsRoutes = require("./routes/hospitals");
+const appointmentsRoutes = require("./routes/appointments");
 
-// Route: Create table
-app.get('/createpatienttable', (req, res) => {
-    let sql = 'CREATE TABLE Patient ( id int AUTO_INCREMENT, firstName VARCHAR(60), surname VARCHAR(60), pathology VARCHAR(100), PRIMARY KEY(id) )';
-    
-    db.query(sql, (err, result) => {
-        if(err) {
-            throw err;
-        }
-        console.log(result);
-        res.send('Patient table created!')
-    });
-});
 
-// Route: Insert patient 1
-app.get('/add1', (req, res) => {
-    let patient = {firstName:'Luis', surname:'Corales', pathology:'None'};
-    let sql = 'INSERT INTO patient SET ?';
 
-    db.query(sql, patient, (err, result) => {
-        if(err) {
-            throw err;
-        }
-        console.log(result);
-        res.send('Patient added!')
-    });
-});
-
-// Route: Insert patient 2
-app.get('/add2', (req, res) => {
-    let patient = {firstName:'Mario', surname:'Rodriguez', pathology:'Flu'};
-    let sql = 'INSERT INTO Patient SET ?';
-
-    db.query(sql, patient, (err, result) => {
-        if(err) {
-            throw err;
-        }
-        console.log(result);
-        res.send('Patient added!')
-    });
-});
-
-// Route: Get patients
-app.get('/getpatients', (req, res) => {
-    let sql = 'SELECT * FROM Patient';
-
-    db.query(sql, (err, results) => {
-        if(err) {
-            throw err;
-        }
-        console.log(results);
-        res.send('Patients fetched!')
-    });
-});
-
-// Route: Get selected patient
-app.get('/getpatient/:id', (req, res) => {
-    let sql = `SELECT * FROM Patient WHERE id = ${req.params.id}`;
-
-    db.query(sql, (err, result) => {
-        if(err) {
-            throw err;
-        }
-        console.log(result);
-        res.send(`Patient ${req.params.id} fetched!`)
-    });
-});
-
-// Route: Update patient
-app.get('/update/:id', (req, res) => {
-    let newPathology = 'Fever';
-    let sql = `UPDATE Patient SET pathology = '${newPathology}' WHERE id = ${req.params.id}`;
-
-    db.query(sql, (err, result) => {
-        if(err) {
-            throw err;
-        }
-        console.log(result);
-        res.send(`Patient ${req.params.id} updated!`)
-    });
-});
-
-// Route: Delete patient
-app.get('/deletepatient/:id', (req, res) => {
-    let sql = `DELETE FROM Patient WHERE id = ${req.params.id}`;
-    
-    db.query(sql, (err, result) => {
-        if(err) {
-            throw err;
-        }
-        console.log(result);
-        res.send(`Patient ${req.params.id} deleted!`)
-    });
-});
-
-// Route: Inactivate patient (to avoid deleting data, just change a boolean if it's active or not)
+// Route: Deactivate patient (to avoid deleting data, just change a boolean if it's active or not)
 
 // Settings -> port = 5500
 app.set("port", 5500);
 const port = app.set("port");
 
+// Configures express to read and write JSON
+app.use(express.json());
+
+// Handle each route
+app.use("/patients", patientsRoutes);
+app.use("/doctors", doctorsRoutes);
+app.use("/hospitals", hospitalsRoutes);
+app.use("/appointments", appointmentsRoutes)
+
+// If not fitting route was found, then display error
+app.use((req, res, next) => {
+    let error = new Error("Type of request not found");
+
+    error.status = 404;
+    // Forward this error
+    next(error);
+});
+
+// Get the forwarded error or any other
+app.use((error, req, res, next) => {
+    res.status(error.status || 500);
+    res.json({
+        error: {
+            message: error.message
+        }
+    });
+});
+
+// Set up and run the API server
 app.listen(port, () => {
     console.log("The server is running on port:", port);
 });
