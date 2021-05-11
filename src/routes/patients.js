@@ -29,11 +29,11 @@ router.get("/:patientId", (req, res) => {
     });
 });
 
-router.patch("/:patientId", (req, res) => {
+router.put("/:patientId", (req, res) => {
     let id = req.params.patientId;
 
     res.status(200).json({
-        message: 'PATCH request to /patients',
+        message: 'PUT request to /patients',
         id: id
     });
 });
