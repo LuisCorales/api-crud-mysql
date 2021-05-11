@@ -28,11 +28,11 @@ router.get("/:hospitalId", (req, res) => {
     });
 });
 
-router.patch("/:hospitalId", (req, res) => {
+router.put("/:hospitalId", (req, res) => {
     let id = req.params.hospitalId;
 
     res.status(200).json({
-        message: 'PATCH request to /hospitals',
+        message: 'PUT request to /hospitals',
         id: id
     });
 });
