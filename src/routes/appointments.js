@@ -28,11 +28,11 @@ router.get("/:appointmentId", (req, res) => {
     });
 });
 
-router.patch("/:appointmentId", (req, res) => {
+router.put("/:appointmentId", (req, res) => {
     let id = req.params.appointmentId;
 
     res.status(200).json({
-        message: 'PATCH request to /appointments',
+        message: 'PUT request to /appointments',
         id: id
     });
 });
