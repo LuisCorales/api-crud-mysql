@@ -2,15 +2,17 @@
 const express = require("express");
 const app = express();
 
+// Database
+const {connectToDB, createDB, createTables} = require("./db/database");
+connectToDB;
+createDB;
+createTables();
+
 // Get the routes of each table
 const patientsRoutes = require("./routes/patients");
 const doctorsRoutes = require("./routes/doctors");
 const hospitalsRoutes = require("./routes/hospitals");
 const appointmentsRoutes = require("./routes/appointments");
-
-
-
-// Route: Deactivate patient (to avoid deleting data, just change a boolean if it's active or not)
 
 // Settings -> port = 5500
 app.set("port", 5500);
@@ -48,3 +50,4 @@ app.use((error, req, res, next) => {
 app.listen(port, () => {
     console.log("The server is running on port:", port);
 });
+
