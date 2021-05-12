@@ -43,7 +43,7 @@ const createTables = () => {
         } else {
             console.log("The table 'patient' was not created because it already exists.");
         }
-    })
+    });
 
     db.query(hospitalModel, (err, result) => {
         if(err) {
@@ -53,7 +53,7 @@ const createTables = () => {
         } else {
             console.log("The table 'hospital' was not created because it already exists.");
         }
-    })
+    });
 
     db.query(doctorModel, (err, result) => {
         if(err) {
@@ -63,7 +63,7 @@ const createTables = () => {
         } else {
             console.log("The table 'doctor' was not created because it already exists.");
         }
-    })
+    });
     
 
     db.query(appointmentModel, (err, result) => {
@@ -74,8 +74,7 @@ const createTables = () => {
         } else {
             console.log("The table 'appointment' was not created because it already exists.");
         }
-    })
+    });
 };
-
 
 module.exports = {connectToDB, createDB, createTables};
