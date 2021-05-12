@@ -84,7 +84,7 @@ router.put("/:doctorId", (req, res) => {
         firstName: req.body.firstName,
         surname: req.body.surname,
         speciality: req.body.speciality,
-        hospital: req.body.hospitalId
+        hospitalId: req.body.hospitalId
     }
 
     let sql = 'UPDATE medicaldb.doctor SET ? WHERE id = ' + id;
