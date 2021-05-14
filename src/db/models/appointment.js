@@ -3,8 +3,8 @@ const sql = 'CREATE TABLE IF NOT EXISTS medicaldb.appointment ( ' +
     'id INT NOT NULL AUTO_INCREMENT, ' +
     'doctorId INT NOT NULL, ' +
     'patientId INT NOT NULL, ' +
-    'time DATETIME NOT NULL, ' +
-    'duration INT NOT NULL, ' +
+    'startTime DATETIME NOT NULL, ' +
+    'endTime DATETIME NOT NULL, ' +
     'PRIMARY KEY (id), ' +
     'INDEX doctorId_idx (doctorId ASC) VISIBLE, ' +
     'INDEX patientId_idx (patientId ASC) VISIBLE, ' +
