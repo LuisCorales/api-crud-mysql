@@ -29,8 +29,8 @@ app.use("/appointments", appointmentsRoutes)
 
 // If not fitting route was found, then display error
 app.use((req, res, next) => {
-    let error = new Error("Type of request not found");
-
+    let error = new Error("Type of request not found: " + req.url);
+    console.log(error.message)
     error.status = 404;
     // Forward this error
     next(error);
