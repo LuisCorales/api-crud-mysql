@@ -18,6 +18,8 @@
   "homepage": "https://github.com/LuisCorales/api-crud-mysql#readme",
   "dependencies": {
     "express": "^4.17.1",
+    "moment": "^2.29.1",
+    "moment-range": "^4.0.2",
     "mysql": "^2.18.1"
   },
   "devDependencies": {
