@@ -1,9 +1,9 @@
 const database = require("../db/database");
 const db = database.db;
 
-// All the functions will be executed when a route is called
+// All the functions will be executed when a patients route is called
 
-// To GET route
+// To GET patients route
 exports.getAll = (req, res) => {
     let sql = 'SELECT * FROM medicaldb.patient';
 
@@ -20,7 +20,7 @@ exports.getAll = (req, res) => {
     });
 };
 
-// To POST route
+// To POST patients route
 exports.post = (req, res) => {
     let patientData = {
         firstName: req.body.firstName,
@@ -42,7 +42,7 @@ exports.post = (req, res) => {
     });  
 }; 
 
-// To GET by id route
+// To GET by id patients route
 exports.getOne = (req, res) => {
     let id = req.params.patientId;
 
@@ -61,7 +61,7 @@ exports.getOne = (req, res) => {
     });
 };
 
-// To PUT route
+// To PUT patients route
 exports.put = (req, res) => {
     let id = req.params.patientId;
     let patientData = {
@@ -85,7 +85,7 @@ exports.put = (req, res) => {
     });  
 };
 
-// To DELETE route
+// To DELETE patients route
 exports.delete = async (req, res) => {
     let id = req.params.patientId;
 
