@@ -23,7 +23,7 @@ const connectToDB = db.connect((err) => {
 });
 
 // Create DB
-const createDB = db.query('CREATE DATABASE IF NOT EXISTS medicaldb', async (err, result) => {
+const createDB = db.query('CREATE DATABASE IF NOT EXISTS medicaldb', (err, result) => {
     if(err) {
         console.log(err.message);
     } else if(result.warningCount == 0) {
@@ -77,4 +77,4 @@ const createTables = () => {
     });
 };
 
-module.exports = {connectToDB, createDB, createTables};
+module.exports = {connectToDB, createDB, createTables, db};
