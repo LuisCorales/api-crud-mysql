@@ -1,13 +1,20 @@
 const database = require("../db/database");
 const db = database.db;
 
-// All the functions will be executed when a route is called
+// All the functions will be executed when a appointments route is called
 
-// To GET route
+// To GET appointments route
 exports.getAll = (req, res) => {
-    res.send
-    
-    let sql = 'SELECT * FROM medicaldb.appointment';
+    let sql = 'SELECT appointment.id, appointment.time, appointment.duration, ' +
+    'CONCAT(patient.firstName, " ", patient.surname) AS patientName, patient.pathology, ' +
+    'CONCAT(doctor.firstName, " ", doctor.surname) AS doctortName, doctor.speciality, hospital.name AS hospitalName ' +
+    'FROM medicaldb.appointment ' + 
+    'INNER JOIN medicaldb.patient ' + 
+    'ON appointment.patientId = patient.id ' +
+    'INNER JOIN medicaldb.doctor ' +
+    'ON appointment.doctorId = doctor.id ' +
+    'INNER JOIN medicaldb.hospital ' +
+    'ON doctor.hospitalId = hospital.id';
 
     db.query(sql, (err, result) => {
         if(err) {
@@ -22,7 +29,7 @@ exports.getAll = (req, res) => {
     });
 };
 
-// To POST route
+// To POST appointments route
 exports.post = (req, res) => {
     let appointmentData = {
         patientId: req.body.patientId,
@@ -45,11 +52,21 @@ exports.post = (req, res) => {
     });  
 };
 
-// To GET by id route
+// To GET by id appointments route
 exports.getOne = (req, res) => {
     let id = req.params.appointmentId;
 
-    let sql = 'SELECT * FROM medicaldb.appointment WHERE id = ' + id;
+    let sql = 'SELECT appointment.id, appointment.time, appointment.duration, ' +
+    'CONCAT(patient.firstName, " ", patient.surname) AS patientName, patient.pathology, ' +
+    'CONCAT(doctor.firstName, " ", doctor.surname) AS doctortName, doctor.speciality, hospital.name AS hospitalName ' +
+    'FROM medicaldb.appointment ' + 
+    'INNER JOIN medicaldb.patient ' + 
+    'ON appointment.patientId = patient.id ' +
+    'INNER JOIN medicaldb.doctor ' +
+    'ON appointment.doctorId = doctor.id ' +
+    'INNER JOIN medicaldb.hospital ' +
+    'ON doctor.hospitalId = hospital.id ' +
+    'WHERE appointment.id = ' + id;
 
     db.query(sql, (err, result) => {
         if(err) {
@@ -64,7 +81,7 @@ exports.getOne = (req, res) => {
     });
 };
 
-// To PUT route
+// To PUT appointments route
 exports.put = (req, res) => {
     let id = req.params.appointmentId;
     let appointmentData = {
@@ -89,7 +106,7 @@ exports.put = (req, res) => {
     });  
 };
 
-// To DELETE route
+// To DELETE appointments route
 exports.delete = (req, res) => {
     let id = req.params.appointmentId;
 
