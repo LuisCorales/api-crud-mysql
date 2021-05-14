@@ -1,11 +1,15 @@
 const database = require("../db/database");
 const db = database.db;
 
-// All the functions will be executed when a route is called
+// All the functions will be executed when a doctors route is called
 
-// To GET route
+// To GET doctors route
 exports.getAll = (req, res) => {
-    let sql = 'SELECT * FROM medicaldb.doctor';
+    let sql = 'SELECT doctor.firstName, doctor.surname, doctor.speciality, ' + 
+    'hospital.name AS hospitalName ' + 
+    'FROM medicaldb.doctor ' +
+    'INNER JOIN medicaldb.hospital ' +
+    'ON doctor.hospitalId = hospital.id';
 
     db.query(sql, (err, result) => {
         if(err) {
@@ -20,7 +24,7 @@ exports.getAll = (req, res) => {
     });
 };
 
-// To POST route
+// To POST doctors route
 exports.post = (req, res) => {
     let doctorData = {
         firstName: req.body.firstName,
@@ -43,11 +47,16 @@ exports.post = (req, res) => {
     });    
 }; 
 
-// To GET by id route
+// To GET by id doctors route
 exports.getOne = (req, res) => {
     let id = req.params.doctorId;
 
-    let sql = 'SELECT * FROM medicaldb.doctor WHERE id = ' + id;
+    let sql = 'SELECT doctor.firstName, doctor.surname, doctor.speciality, ' + 
+    'hospital.name AS hospitalName ' + 
+    'FROM medicaldb.doctor ' +
+    'INNER JOIN medicaldb.hospital ' +
+    'ON doctor.hospitalId = hospital.id ' +
+    'WHERE doctor.id = ' + id;
 
     db.query(sql, (err, result) => {
         if(err) {
@@ -62,7 +71,7 @@ exports.getOne = (req, res) => {
     });
 };
 
-// To PUT route
+// To PUT doctors route
 exports.put = (req, res) => {
     let id = req.params.doctorId;
     let doctorData = {
@@ -87,7 +96,7 @@ exports.put = (req, res) => {
     });  
 };
 
-// To DELETE route
+// To DELETE doctors route
 exports.delete = async (req, res) => {
     let id = req.params.doctorId;
 
