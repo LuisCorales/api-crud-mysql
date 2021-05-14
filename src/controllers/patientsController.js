@@ -9,6 +9,10 @@ exports.getAll = (req, res) => {
 
     db.query(sql, (err, result) => {
         if(err) {
+            res.status(404).json({
+                message: 'There was a problem...',
+                error: err.message
+            });
             console.log(err.message);
         } else {
             res.status(200).json({
@@ -31,6 +35,10 @@ exports.post = (req, res) => {
 
     db.query(sql, patientData, (err) => {
         if(err) {
+            res.status(404).json({
+                message: 'There was a problem...',
+                error: err.message
+            });
             console.log(err.message);
         } else {
             res.status(200).json({
@@ -50,6 +58,10 @@ exports.getOne = (req, res) => {
 
     db.query(sql, (err, result) => {
         if(err) {
+            res.status(404).json({
+                message: 'There was a problem...',
+                error: err.message
+            });
             console.log(err.message);
         } else {
             res.status(200).json({
@@ -74,6 +86,10 @@ exports.put = (req, res) => {
 
     db.query(sql, patientData, (err) => {
         if(err) {
+            res.status(404).json({
+                message: 'There was a problem...',
+                error: err.message
+            });
             console.log(err.message);
         } else {
             res.status(200).json({
@@ -93,6 +109,10 @@ exports.delete = async (req, res) => {
 
     db.query(sql, (err, result) => {
         if(err) {
+            res.status(404).json({
+                message: 'There was a problem...',
+                error: err.message
+            });
             console.log(err.message);
         } else {
             res.status(200).json({
