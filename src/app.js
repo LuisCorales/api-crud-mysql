@@ -3,7 +3,7 @@ const express = require("express");
 const app = express();
 
 // Database
-const {connectToDB, createDB, createTables} = require("./db/database");
+const { connectToDB, createDB, createTables } = require("./db/database");
 connectToDB;
 createDB;
 createTables();
@@ -25,24 +25,20 @@ app.use(express.json());
 app.use("/patients", patientsRoutes);
 app.use("/doctors", doctorsRoutes);
 app.use("/hospitals", hospitalsRoutes);
-app.use("/appointments", appointmentsRoutes)
+app.use("/appointments", appointmentsRoutes);
 
 // If not fitting route was found, then display error
 app.use((req, res, next) => {
     let error = new Error("Type of request not found: " + req.url);
-    console.log(error.message)
-    error.status = 404;
+
     // Forward this error
     next(error);
 });
 
 // Get the forwarded error or any other
 app.use((error, req, res, next) => {
-    res.status(error.status || 500);
-    res.json({
-        error: {
-            message: error.message
-        }
+    return res.status(500).json({
+        error: error.message
     });
 });
 
@@ -50,4 +46,3 @@ app.use((error, req, res, next) => {
 app.listen(port, () => {
     console.log("The server is running on port:", port);
 });
-
