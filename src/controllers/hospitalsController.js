@@ -1,121 +1,151 @@
 const database = require("../db/database");
 const db = database.db;
 
+// If there is an error, send to response
+const sendError = (res, e) => {
+    return res.status(404).json({
+        message: 'There was a problem...',
+        error: e.message
+    });
+};
+
 // All the functions will be executed when a hospitals route is called
 
 // To GET hospitals route
 exports.getAll = (req, res) => {
-    let sql = 'SELECT * FROM medicaldb.hospital';
+    try {
+        let sql = 'SELECT * FROM medicaldb.hospital';
 
-    db.query(sql, (err, result) => {
-        if(err) {
-            res.status(404).json({
-                message: 'There was a problem...',
-                error: err.message
-            });
-            console.log(err.message);
-        } else {
-            res.status(200).json({
+        db.query(sql, (err, result) => {
+            if(err) {
+                throw err;
+            } 
+
+            return res.status(200).json({
                 message: 'GET request to /hospitals',
                 hospitals: result
             });
-            console.log("All hospitals printed!");
-        }
-    });
+        });
+    } catch(e) {
+        sendError(res, e);
+    }
 };
 
 // To POST hospitals route
 exports.post = (req, res) => {
-    let hospitalData = {
-        name: req.body.name
-    }
-    let sql = 'INSERT INTO medicaldb.hospital SET ?';
+    try {
+        if(req.body.name == null)
+        {
+            throw new Error("name cannot be NULL");
+        }
 
-    db.query(sql, hospitalData, (err) => {
-        if(err) {
-            res.status(404).json({
-                message: 'There was a problem...',
-                error: err.message
-            });
-            console.log(err.message);
-        } else {
-            res.status(200).json({
+        let hospitalData = {
+            name: req.body.name
+        }
+
+        let sql = 'INSERT INTO medicaldb.hospital SET ?';
+
+        db.query(sql, hospitalData, (err) => {
+            if(err) {
+                throw err;
+            } 
+
+            return res.status(200).json({
                 message: 'POST request to /hospitals',
                 createdHospital: hospitalData
             });
-            console.log("A new hospital was inserted!");
-        }
-    });  
+        }); 
+    } catch(e) {
+        sendError(res, e);
+    }
 }; 
 
 // To GET by id hospitals route
 exports.getOne = (req, res) => {
-    let id = req.params.hospitalId;
+    try {
+        if(isNaN(req.params.hospitalId))
+        {
+            throw new Error("The id must be a number")
+        }
 
-    let sql = 'SELECT * FROM medicaldb.hospital WHERE id = ' + id;
+        let id = req.params.hospitalId;
 
-    db.query(sql, (err, result) => {
-        if(err) {
-            res.status(404).json({
-                message: 'There was a problem...',
-                error: err.message
-            });
-            console.log(err.message);
-        } else {
+        let sql = 'SELECT * FROM medicaldb.hospital WHERE id = ' + id;
+
+        db.query(sql, (err, result) => {
+            if(err) {
+                throw err;
+            } 
+            
             res.status(200).json({
                 message: 'GET request to /hospital/' + id,
                 hospital: result
             });
-            console.log("Printed hospital with id = " + id);
-        }
-    });
+        });
+    } catch(e) {
+        sendError(res, e);
+    }
 };
 
 // To PUT hospitals route
 exports.put = (req, res) => {
-    let id = req.params.hospitalId;
-    let hospitalData = {
-        name: req.body.name
-    }
+    try {
+        if(isNaN(req.params.hospitalId))
+        {
+            throw new Error("The id must be a number")
+        }
 
-    let sql = 'UPDATE medicaldb.hospital SET ? WHERE id = ' + id;
+        if(req.body.name == null)
+        {
+            throw new Error("name cannot be NULL");
+        }
 
-    db.query(sql, hospitalData, (err) => {
-        if(err) {
-            res.status(404).json({
-                message: 'There was a problem...',
-                error: err.message
-            });
-            console.log(err.message);
-        } else {
-            res.status(200).json({
+        let id = req.params.hospitalId;
+
+        let hospitalData = {
+            name: req.body.name
+        }
+
+        let sql = 'UPDATE medicaldb.hospital SET ? WHERE id = ' + id;
+
+        db.query(sql, hospitalData, (err) => {
+            if(err) {
+                throw err;
+            } 
+            
+            return res.status(200).json({
                 message: 'PUT request to /hospitals/' + id,
                 updatedHospital: hospitalData
             });
-            console.log("Updated hospital with id = " + id);
-        }
-    }); 
+        }); 
+    } catch(e) {
+        sendError(res, e);
+    }
 };
 
 // To DELETE hospitals route
 exports.delete = async (req, res) => {
-    let id = req.params.hospitalId;
+    try {
+        if(isNaN(req.params.hospitalId))
+        {
+            throw new Error("The id must be a number")
+        }
 
-    let sql = 'DELETE FROM medicaldb.hospital WHERE id = ' + id;
+        let id = req.params.hospitalId;
 
-    db.query(sql, (err, result) => {
-        if(err) {
-            res.status(404).json({
-                message: 'There was a problem...',
-                error: err.message
-            });
-            console.log(err.message);
-        } else {
-            res.status(200).json({
+        let sql = 'DELETE FROM medicaldb.hospital WHERE id = ' + id;
+
+        db.query(sql, (err, result) => {
+            if(err) {
+                throw err;
+            } 
+            
+            return res.status(200).json({
                 message: 'DELETE request to /hospitals/' + id,
                 deletedHospital: result
             });
-            console.log("Deleted hospital with id = " + id);
-        }
-    }); 
+        }); 
+    } catch(e) {
+        sendError(res, err);
+    }
 };
