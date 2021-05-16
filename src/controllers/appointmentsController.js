@@ -6,6 +6,14 @@ const moment = MomentRange.extendMoment(Moment);
 const database = require("../db/database");
 const db = database.db;
 
+// If there is an error, send to response
+const sendError = (res, e) => {
+    return res.status(404).json({
+        message: 'There was a problem...',
+        error: e.message
+    });
+};
+
 // Asign doctor by speciality
 const asingDoctor = (pathology) => {
     var speciality;
@@ -72,7 +80,6 @@ const checkIfOverlap = (startTimeNew, endTimeNew, otherDates) => {
         if(range1.contains(startTime) && range1.contains(endTime) || (range2.contains(dateStart) || range2.contains(dateEnd))) {
             // Overlap
             var overlapMessage = "There are dates overlapping...";
-            console.log(overlapMessage);
             return [true, overlapMessage];
         }
     }
@@ -85,56 +92,57 @@ const checkIfOverlap = (startTimeNew, endTimeNew, otherDates) => {
 
 // To GET appointments route
 exports.getAll = (req, res) => {
-    let sql = 'SELECT appointment.id, appointment.startTime, appointment.endTime, ' +
-    'CONCAT(patient.firstName, " ", patient.surname) AS patientName, patient.pathology, ' +
-    'CONCAT(doctor.firstName, " ", doctor.surname) AS doctorName, doctor.speciality, hospital.name AS hospitalName ' +
-    'FROM medicaldb.appointment ' + 
-    'INNER JOIN medicaldb.patient ' + 
-    'ON appointment.patientId = patient.id ' +
-    'INNER JOIN medicaldb.doctor ' +
-    'ON appointment.doctorId = doctor.id ' +
-    'INNER JOIN medicaldb.hospital ' +
-    'ON doctor.hospitalId = hospital.id';
+    try {
+        let sql = 'SELECT appointment.id, appointment.startTime, appointment.endTime, ' +
+        'CONCAT(patient.firstName, " ", patient.surname) AS patientName, patient.pathology, ' +
+        'CONCAT(doctor.firstName, " ", doctor.surname) AS doctorName, doctor.speciality, hospital.name AS hospitalName ' +
+        'FROM medicaldb.appointment ' + 
+        'INNER JOIN medicaldb.patient ' + 
+        'ON appointment.patientId = patient.id ' +
+        'INNER JOIN medicaldb.doctor ' +
+        'ON appointment.doctorId = doctor.id ' +
+        'INNER JOIN medicaldb.hospital ' +
+        'ON doctor.hospitalId = hospital.id';
 
-    db.query(sql, (err, result) => {
-        if(err) {
-            res.status(404).json({
-                message: 'There was a problem...',
-                error: err.message
-            });
-            console.log(err.message);
-        } else {
-            res.status(200).json({
+        db.query(sql, (err, result) => {
+            if(err) {
+                throw err;
+            }
+
+            return res.status(200).json({
                 message: 'GET request to /appointments',
                 appointments: result
             });
-            console.log("All appointments printed!");
-        }
-    });
+        });
+    } catch(e) {
+        sendError(res, e);
+    }
 };
 
 // To POST appointments route
 exports.post = (req, res) => {
-    let appointmentData = {
-        patientId: req.body.patientId,
-        startTime: req.body.startTime,
-        endTime: req.body.endTime
-    }
-
-    let sql = "SELECT patient.pathology " +
-    "FROM medicaldb.patient " + 
-    "WHERE patient.id = " + appointmentData.patientId;
-
     try {
-        checkDurationValues = checkDuration(appointmentData.startTime, appointmentData.endTime);
+        if(req.body.patientId == null || req.body.startTime == null || req.body.endTime == null)
+        {
+            throw new Error("None value can be NULL");
+        }
+
+        let appointmentData = {
+            patientId: req.body.patientId,
+            startTime: req.body.startTime,
+            endTime: req.body.endTime
+        }
+    
+        let sql = "SELECT patient.pathology " +
+        "FROM medicaldb.patient " + 
+        "WHERE patient.id = " + appointmentData.patientId;
+
+        var checkDurationValues = checkDuration(appointmentData.startTime, appointmentData.endTime);
 
         if(checkDurationValues[0] == false){
             // If duration is incorrect
             throw error = new Error(checkDurationValues[1]);
         }
-
-        // If duration is correct, continues
-        console.log(checkDurationValues[1]);
 
         // Get the patient pathology
         db.query(sql, (err, result) => {
@@ -183,83 +191,88 @@ exports.post = (req, res) => {
                                 throw err;
                             }
 
-                            res.status(200).json({
+                            return res.status(200).json({
                                 message: 'POST request to /appointments',
                                 createdAppointment: data
                             });
-                            console.log("A new appointment was inserted!");
                         });
-
-                        console.log(overlapping[1]);
                     } else {                         
                         // If it overlaps
-                        res.status(401).json({
+                        return res.status(401).json({
                             message: 'The date you input is overlapping with another...',
                             yourDate: appointmentData.startTime + " till " + appointmentData.endTime,
                             doctorDates: dateResult
                         });
-
-                        console.log(overlapping[1]);
                     }
                 });
             });
         });
     } catch(e) {
-        res.status(404).json({
-            message: 'There was a problem...',
-            error: e.message
-        });
-        console.log(e.message);
+        sendError(res, e);
     }
 };
 
-// To GET by id appointments route
-exports.getOne = (req, res) => {
-    let id = req.params.appointmentId;
+// To GET all appointments of a doctor by id
+exports.getOneDoctorAppointments = (req, res) => {
+    try {
+        if(isNaN(req.params.doctorId))
+        {
+            throw new Error("The id must be a number")
+        }
 
-    let sql = 'SELECT appointment.id, appointment.startTime, appointment.endTime, ' +
-    'CONCAT(patient.firstName, " ", patient.surname) AS patientName, patient.pathology, ' +
-    'CONCAT(doctor.firstName, " ", doctor.surname) AS doctorName, doctor.speciality, hospital.name AS hospitalName ' +
-    'FROM medicaldb.appointment ' + 
-    'INNER JOIN medicaldb.patient ' + 
-    'ON appointment.patientId = patient.id ' +
-    'INNER JOIN medicaldb.doctor ' +
-    'ON appointment.doctorId = doctor.id ' +
-    'INNER JOIN medicaldb.hospital ' +
-    'ON doctor.hospitalId = hospital.id ' +
-    'WHERE appointment.id = ' + id;
+        let id = req.params.doctorId;
 
-    db.query(sql, (err, result) => {
-        if(err) {
-            res.status(404).json({
-                message: 'There was a problem...',
-                error: err.message
-            });
-            console.log(err.message);
-        } else {
-            res.status(200).json({
+        let sql = 'SELECT appointment.id, appointment.startTime, appointment.endTime, ' +
+        'CONCAT(patient.firstName, " ", patient.surname) AS patientName, patient.pathology, ' +
+        'CONCAT(doctor.firstName, " ", doctor.surname) AS doctorName, doctor.speciality, hospital.name AS hospitalName ' +
+        'FROM medicaldb.appointment ' + 
+        'INNER JOIN medicaldb.patient ' + 
+        'ON appointment.patientId = patient.id ' +
+        'INNER JOIN medicaldb.doctor ' +
+        'ON appointment.doctorId = doctor.id ' +
+        'INNER JOIN medicaldb.hospital ' +
+        'ON doctor.hospitalId = hospital.id ' +
+        'WHERE appointment.doctorId = ' + id;
+
+        db.query(sql, (err, result) => {
+            if(err) {
+                throw err;
+            }
+
+            return res.status(200).json({
                 message: 'GET request to /appointments/' + id,
                 appointment: result
             });
-            console.log("Printed appointment with id = " + id);
-        }
-    });
+        });
+    } catch(e) {
+        sendError(res, e);
+    }
 };
 
 // To PUT appointments route
 exports.put = (req, res) => {
-    let id = req.params.appointmentId;
-    let appointmentData = {
-        patientId: req.body.patientId,
-        startTime: req.body.startTime,
-        endTime: req.body.endTime
-    }
-
-    let sql = "SELECT patient.pathology " +
-    "FROM medicaldb.patient " + 
-    "WHERE patient.id = " + appointmentData.patientId;
-
     try {
+        if(isNaN(req.params.appointmentId))
+        {
+            throw new Error("The id must be a number")
+        }
+
+        if(req.body.patientId == null || req.body.startTime == null || req.body.endTime == null)
+        {
+            throw new Error("None value can be NULL");
+        }
+
+        let id = req.params.appointmentId;
+        let appointmentData = {
+            patientId: req.body.patientId,
+            startTime: req.body.startTime,
+            endTime: req.body.endTime
+        }
+
+        let sql = "SELECT patient.pathology " +
+        "FROM medicaldb.patient " + 
+        "WHERE patient.id = " + appointmentData.patientId;
+
         checkDurationValues = checkDuration(appointmentData.startTime, appointmentData.endTime);
 
         if(checkDurationValues[0] == false){
@@ -317,55 +330,50 @@ exports.put = (req, res) => {
                                 throw err;
                             }
 
-                            res.status(200).json({
+                            return res.status(200).json({
                                 message: 'PUT request to /appointments/' + id,
                                 updatedAppointment: data
                             });
-                            console.log("Updated appointment with id = " + id);
                         });
-
-                        console.log(overlapping[1]);
                     } else {                         
                         // If it overlaps
-                        res.status(401).json({
+                        return res.status(401).json({
                             message: 'The date you input is overlapping with another...',
                             yourDate: appointmentData.startTime + " till " + appointmentData.endTime,
                             doctorDates: dateResult
                         });
-
-                        console.log(overlapping[1]);
                     }
                 });
             });
         });
     } catch(e) {
-        res.status(404).json({
-            message: 'There was a problem...',
-            error: e.message
-        });
-        console.log(e.message);
+        sendError(res, e);
     } 
 };
 
 // To DELETE appointments route
 exports.delete = (req, res) => {
-    let id = req.params.appointmentId;
+    try {
+        if(isNaN(req.params.appointmentId))
+        {
+            throw new Error("The id must be a number")
+        }
 
-    let sql = 'DELETE FROM medicaldb.appointment WHERE id = ' + id;
+        let id = req.params.appointmentId;
 
-    db.query(sql, (err, result) => {
-        if(err) {
-            res.status(404).json({
-                message: 'There was a problem...',
-                error: err.message
-            });
-            console.log(err.message);
-        } else {
-            res.status(200).json({
+        let sql = 'DELETE FROM medicaldb.appointment WHERE id = ' + id;
+
+        db.query(sql, (err, result) => {
+            if(err) {
+                throw err;
+            }
+
+            return res.status(200).json({
                 message: 'DELETE request to /appointments/' + id,
                 deletedAppointment: result
             });
-            console.log("Deleted appointment with id = " + id);
-        }
-    }); 
+        }); 
+    } catch(e) {
+        sendError(res, e);
+    }
 };
