@@ -4,8 +4,8 @@ const app = express();
 
 // Database
 const { connectToDB, createDB, createTables } = require("./db/database");
-connectToDB;
-createDB;
+connectToDB();
+createDB();
 createTables();
 
 // Get the routes of each table
