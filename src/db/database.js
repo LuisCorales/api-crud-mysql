@@ -14,18 +14,18 @@ const db = mysql.createConnection({
 });
 
 // Connect to MySQL
-const connectToDB = db.connect((err) => {
+const connectToDB = () => {
     try {
-        if(err) {
-            throw err;
-        }
-        
-        console.log("MySQL connected!")
+        db.connect((err) => {
+            if(err) {
+                throw err;
+            }
+            console.log("MySQL connected!")
+        });
     } catch(e) {
         console.log("ERROR AT CONNECTING DB:", e.message);
     }
-    
-});
+};
 
 // Create DB
 const createDB = () => {
