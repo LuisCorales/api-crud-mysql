@@ -19,7 +19,14 @@ exports.getAll = (req, res) => {
         db.query(sql, (err, result) => {
             if(err) {
                 throw err;
-            } 
+            }
+
+            if(result.length == 0) {
+                return res.status(200).json({
+                    message: 'GET request to /hospitals/',
+                    warning: 'There are no hospitals yet'
+                });
+            }
 
             return res.status(200).json({
                 message: 'GET request to /hospitals',
@@ -48,7 +55,7 @@ exports.post = (req, res) => {
         db.query(sql, hospitalData, (err) => {
             if(err) {
                 throw err;
-            } 
+            }
 
             return res.status(200).json({
                 message: 'POST request to /hospitals',
@@ -76,8 +83,15 @@ exports.getOne = (req, res) => {
             if(err) {
                 throw err;
             } 
+
+            if(result.length == 0) {
+                return res.status(200).json({
+                    message: 'GET request to /hospitals/' + id,
+                    warning: 'There is no hospital with id: ' + id
+                });
+            }
             
-            res.status(200).json({
+            return res.status(200).json({
                 message: 'GET request to /hospital/' + id,
                 hospital: result
             });
@@ -108,10 +122,18 @@ exports.put = (req, res) => {
 
         let sql = 'UPDATE medicaldb.hospital SET ? WHERE id = ' + id;
 
-        db.query(sql, hospitalData, (err) => {
+        db.query(sql, hospitalData, (err, result) => {
             if(err) {
                 throw err;
             } 
+            
+            if(result.changedRows == 0)
+            {
+                return res.status(200).json({
+                    message: 'PUT request to /hospitals/' + id,
+                    warning: 'There is no hospital with id: ' + id
+                });
+            }
             
             return res.status(200).json({
                 message: 'PUT request to /hospitals/' + id,
@@ -124,7 +146,7 @@ exports.put = (req, res) => {
 };
 
 // To DELETE hospitals route
-exports.delete = async (req, res) => {
+exports.delete = (req, res) => {
     try {
         if(isNaN(req.params.hospitalId))
         {
@@ -138,14 +160,22 @@ exports.delete = async (req, res) => {
         db.query(sql, (err, result) => {
             if(err) {
                 throw err;
-            } 
+            }
+
+            if(result.changedRows == 0)
+            {
+                return res.status(200).json({
+                    message: 'DELETE request to /hospitals/' + id,
+                    warning: 'There is no hospital with id: ' + id
+                });
+            }
             
             return res.status(200).json({
                 message: 'DELETE request to /hospitals/' + id,
-                deletedHospital: result
+                deletedHospital: 'Deleted hospital with id: ' + id
             });
         }); 
     } catch(e) {
-        sendError(res, err);
+        sendError(res, e);
     }
 };
