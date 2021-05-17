@@ -14,7 +14,7 @@ const sendError = (res, e) => {
 // To GET doctors route
 exports.getAll = (req, res) => {
     try {
-        let sql = 'SELECT doctor.firstName, doctor.surname, doctor.speciality, ' + 
+        let sql = 'SELECT doctor.id, doctor.firstName, doctor.surname, doctor.speciality, ' + 
         'hospital.name AS hospitalName ' + 
         'FROM medicaldb.doctor ' +
         'INNER JOIN medicaldb.hospital ' +
@@ -23,6 +23,13 @@ exports.getAll = (req, res) => {
         db.query(sql, (err, result) => {
             if(err) {
                 throw err;
+            }
+
+            if(result.length == 0) {
+                return res.status(200).json({
+                    message: 'GET request to /doctors/',
+                    warning: 'There are no doctors yet'
+                });
             }
 
             return res.status(200).json({
@@ -77,7 +84,7 @@ exports.getOne = (req, res) => {
 
         let id = req.params.doctorId;
 
-        let sql = 'SELECT doctor.firstName, doctor.surname, doctor.speciality, ' + 
+        let sql = 'SELECT doctor.id, doctor.firstName, doctor.surname, doctor.speciality, ' + 
         'hospital.name AS hospitalName ' + 
         'FROM medicaldb.doctor ' +
         'INNER JOIN medicaldb.hospital ' +
@@ -87,12 +94,19 @@ exports.getOne = (req, res) => {
         db.query(sql, (err, result) => {
             if(err) {
                 throw err;
-            } else {
+            }
+
+            if(result.length == 0) {
                 return res.status(200).json({
                     message: 'GET request to /doctors/' + id,
-                    doctor: result
+                    warning: 'There is no doctor with id: ' + id
                 });
             }
+            
+            return res.status(200).json({
+                message: 'GET request to /doctors/' + id,
+                doctor: result
+            });
         });
     } catch(e) {
         sendError(res, e);
@@ -122,10 +136,19 @@ exports.put = (req, res) => {
 
         let sql = 'UPDATE medicaldb.doctor SET ? WHERE id = ' + id;
 
-        db.query(sql, doctorData, (err) => {
+        db.query(sql, doctorData, (err, result) => {
             if(err) {
                 throw err;
             }
+
+            if(result.changedRows == 0)
+            {
+                return res.status(200).json({
+                    message: 'PUT request to /doctors/' + id,
+                    warning: 'There is no doctor with id: ' + id
+                });
+            }
+
             return res.status(200).json({
                 message: 'PUT request to /doctors/' + id,
                 updatedDoctor: doctorData
@@ -137,7 +160,7 @@ exports.put = (req, res) => {
 };
 
 // To DELETE doctors route
-exports.delete = async (req, res) => {
+exports.delete = (req, res) => {
     try {
         if(isNaN(req.params.doctorId))
         {
@@ -151,11 +174,19 @@ exports.delete = async (req, res) => {
         db.query(sql, (err, result) => {
             if(err) {
                 throw err;
-            } 
+            }
+
+            if(result.changedRows == 0)
+            {
+                return res.status(200).json({
+                    message: 'DELETE request to /doctors/' + id,
+                    warning: 'There is no doctor with id: ' + id
+                });
+            }
             
             return res.status(200).json({
                 message: 'DELETE request to /doctors/' + id,
-                deletedDoctor: result
+                deletedDoctor: 'Deleted doctor with id: ' + id
             });
         }); 
     } catch(e) {
