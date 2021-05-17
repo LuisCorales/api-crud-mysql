@@ -17,22 +17,26 @@ const sendError = (res, e) => {
 // Asign doctor by speciality
 const asingDoctor = (pathology) => {
     var speciality;
+    var str = pathology.toLowerCase();
 
-    switch (pathology.toLowerCase()) {
+    switch (str) {
         case "cancer":
-            speciality = "Oncology";
+            speciality = "oncology";
             break;
 
-        case "leukemia" || "anemia" || "hemophilia":
-            speciality = "Hematology";
+        case "leukemia": 
+        case "anemia":
+        case "hemophilia":
+            speciality = "hematology";
             break;
         
-        case "hypertension" || "heart attack":
-        speciality = "Cardiology";
+        case "hypertension": 
+        case "heart attack":
+        speciality = "cardiology";
             break;
     
         default:
-            speciality = "General";
+            speciality = "general";
             break;
     }
 
@@ -109,6 +113,13 @@ exports.getAll = (req, res) => {
                 throw err;
             }
 
+            if(result.length == 0) {
+                return res.status(200).json({
+                    message: 'GET request to /appointments/',
+                    warning: 'There are no appointments yet'
+                });
+            }
+
             return res.status(200).json({
                 message: 'GET request to /appointments',
                 appointments: result
@@ -161,6 +172,10 @@ exports.post = (req, res) => {
             db.query(sql, (err, result) => {
                 if(err) {
                     throw err;
+                }
+
+                if(result[0] == null) {
+                    throw new Error("There is no doctor with the correct speciality")
                 }
 
                 sql = "SELECT appointment.startTime, appointment.endTime " + 
@@ -269,10 +284,6 @@ exports.put = (req, res) => {
             endTime: req.body.endTime
         }
 
-        let sql = "SELECT patient.pathology " +
-        "FROM medicaldb.patient " + 
-        "WHERE patient.id = " + appointmentData.patientId;
-
         checkDurationValues = checkDuration(appointmentData.startTime, appointmentData.endTime);
 
         if(checkDurationValues[0] == false){
@@ -280,8 +291,9 @@ exports.put = (req, res) => {
             throw error = new Error(checkDurationValues[1]);
         }
 
-        // If duration is correct, continues
-        console.log(checkDurationValues[1]);
+        let sql = "SELECT patient.pathology " +
+        "FROM medicaldb.patient " + 
+        "WHERE patient.id = " + appointmentData.patientId;
 
         // Get the patient pathology
         db.query(sql, (err, result) => {
@@ -325,9 +337,17 @@ exports.put = (req, res) => {
                         sql = 'UPDATE medicaldb.appointment SET ? WHERE id = ' + id;
 
                         // Insert the data
-                        db.query(sql, data, (err) => {
+                        db.query(sql, data, (err, result) => {
                             if(err) {
                                 throw err;
+                            }
+
+                            if(result.changedRows == 0)
+                            {
+                                return res.status(200).json({
+                                    message: 'PUT request to /appointments/' + id,
+                                    warning: 'There is no appointment with id: ' + id
+                                });
                             }
 
                             return res.status(200).json({
