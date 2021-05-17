@@ -20,6 +20,13 @@ exports.getAll = (req, res) => {
             if(err) {
                 throw err;
             }
+
+            if(result.length == 0) {
+                return res.status(200).json({
+                    message: 'GET request to /patients/',
+                    warning: 'There is no patients yet'
+                });
+            }
             
             return res.status(200).json({
                 message: 'GET request to /patients',
@@ -76,7 +83,14 @@ exports.getOne = (req, res) => {
         db.query(sql, (err, result) => {
             if(err) {
                 throw err;
-            } 
+            }
+
+            if(result.length == 0) {
+                return res.status(200).json({
+                    message: 'GET request to /patients/' + id,
+                    warning: 'There is no patient with id: ' + id
+                });
+            }
             
             return res.status(200).json({
                 message: 'GET request to /patients/' + id,
@@ -109,10 +123,18 @@ exports.put = (req, res) => {
         }
 
         let sql = 'UPDATE medicaldb.patient SET ? WHERE id = ' + id;
-        db.query(sql, patientData, (err) => {
+        db.query(sql, patientData, (err, result) => {
             if(err) {
                 throw err;
             } 
+
+            if(result.changedRows == 0)
+            {
+                return res.status(200).json({
+                    message: 'PUT request to /patients/' + id,
+                    warning: 'There is no patient with id: ' + id
+                });
+            }
             
             return res.status(200).json({
                 message: 'PUT request to /patients/' + id,
@@ -139,6 +161,14 @@ exports.delete = (req, res) => {
         db.query(sql, (err, result) => {
             if(err) {
                 throw err;
+            }
+
+            if(result.changedRows == 0)
+            {
+                return res.status(200).json({
+                    message: 'DELETE request to /patients/' + id,
+                    warning: 'There is no patient with id: ' + id
+                });
             }
             
             return res.status(200).json({
