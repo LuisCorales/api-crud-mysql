@@ -1,44 +1,26 @@
-// Create express application
-const express = require("express");
-const app = express();
-
 // Database
 const { connectToDB, createDB, createTables } = require("./db/database");
 connectToDB();
 createDB();
 createTables();
 
-// Get the routes of each table
-const patientsRoutes = require("./routes/patients");
-const doctorsRoutes = require("./routes/doctors");
-const hospitalsRoutes = require("./routes/hospitals");
-const appointmentsRoutes = require("./routes/appointments");
+// Create express application
+const express = require("express");
+const app = express();
+app.use(express.json());
 
 // Settings -> port = 5500
 app.set("port", 5500);
 const port = app.set("port");
 
-// Configures express to read and write JSON
-app.use(express.json());
-
 // Handle each route
-app.use("/patients", patientsRoutes);
-app.use("/doctors", doctorsRoutes);
-app.use("/hospitals", hospitalsRoutes);
-app.use("/appointments", appointmentsRoutes);
+const router = require('./routes');
+app.use('/', router);
 
 // If not fitting route was found, then display error
-app.use((req, res, next) => {
-    let error = new Error("Type of request not found: " + req.url);
-
-    // Forward this error
-    next(error);
-});
-
-// Get the forwarded error or any other
-app.use((error, req, res, next) => {
+app.use((req, res) => {
     return res.status(500).json({
-        error: error.message
+        error: "Type of request not found: " + req.url
     });
 });
 
